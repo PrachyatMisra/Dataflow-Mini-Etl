@@ -1,0 +1,52 @@
+# ---------------------------------------------------------------------------
+# DataFlow Mini ETL - local stack
+#
+#   docker compose up --build            # postgres + one pipeline run
+#   docker compose --profile tools up    # also start pgAdmin on :5050
+# ---------------------------------------------------------------------------
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dataflow-db
+    environment:
+      POSTGRES_USER: etl
+      POSTGRES_PASSWORD: etl
+      POSTGRES_DB: dataflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U etl -d dataflow"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+
+  etl:
+    build: .
+    container_name: dataflow-etl
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://etl:etl@db:5432/dataflow
+      MARKET_LIMIT: "25"
+      LOG_LEVEL: INFO
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./docs/data:/app/docs/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: dataflow-pgadmin
+    profiles: ["tools"]
+    depends_on:
+      - db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@dataflow.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+
+volumes:
+  pgdata:

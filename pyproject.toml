@@ -1,0 +1,10 @@
+# Tooling configuration - DataFlow Mini ETL
+# (The pipeline itself is run from source: `python -m etl`.)
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Pipeline outputs (regenerated on every run)
+artifacts/
+/data/
+
+# Exception: the dashboard payload must ship with the repo (GitHub Pages)
+!docs/data/
+
+# Local configuration
+.env
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataFlow Mini ETL · Live Dashboard</title>
+  <meta name="description" content="Live market dashboard powered by the DataFlow Mini ETL pipeline - a Python/Pandas/PostgreSQL/Docker ETL project by Prachyat Misra.">
+  <meta name="author" content="Prachyat Misra">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">◫</span>
+      <span class="brand-name">DataFlow <strong>Mini ETL</strong></span>
+      <span class="brand-tag">live dashboard</span>
+    </div>
+    <div class="header-meta">
+      <span id="run-badge" class="badge badge-muted">connecting…</span>
+      <span id="fetched-at" class="muted mono"></span>
+    </div>
+  </header>
+
+  <main id="content">
+    <!-- KPI row -->
+    <section class="kpi-grid" aria-label="Key metrics">
+      <article class="kpi-card">
+        <span class="kpi-label">Tracked market cap</span>
+        <span class="kpi-value" id="kpi-mcap">–</span>
+        <span class="kpi-sub" id="kpi-mcap-sub">top-N coins by market cap</span>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">24h volume</span>
+        <span class="kpi-value" id="kpi-volume">–</span>
+        <span class="kpi-sub" id="kpi-avg-change">avg 24h change</span>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Bitcoin</span>
+        <span class="kpi-value" id="kpi-btc">–</span>
+        <span class="kpi-sub" id="kpi-btc-sub">dominance of tracked universe</span>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Fear &amp; Greed</span>
+        <span class="kpi-value" id="kpi-fng">–</span>
+        <span class="kpi-sub" id="kpi-fng-sub">market sentiment</span>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Pipeline quality gate</span>
+        <span class="kpi-value" id="kpi-quality">–</span>
+        <span class="kpi-sub" id="kpi-quality-sub">validation checks</span>
+      </article>
+    </section>
+
+    <!-- Charts -->
+    <section class="grid-2">
+      <article class="card">
+        <h2>Top 10 by market cap <span class="chart-note">USD</span></h2>
+        <div class="chart-box chart-tall"><canvas id="chart-mcap"></canvas></div>
+      </article>
+      <article class="card">
+        <h2>Market dominance <span class="chart-note">share of tracked cap</span></h2>
+        <div class="chart-box chart-tall"><canvas id="chart-dominance"></canvas></div>
+      </article>
+    </section>
+
+    <section class="grid-2">
+      <article class="card">
+        <h2>7-day trend <span class="chart-note">indexed, start = 100</span></h2>
+        <div class="chart-box"><canvas id="chart-trend"></canvas></div>
+      </article>
+      <article class="card">
+        <h2>Fear &amp; Greed index <span class="chart-note">30 days</span></h2>
+        <div class="chart-box"><canvas id="chart-fng"></canvas></div>
+      </article>
+    </section>
+
+    <!-- Movers -->
+    <section class="card">
+      <h2>Top movers <span class="chart-note">last 24 hours</span></h2>
+      <div class="movers" id="movers"></div>
+    </section>
+
+    <!-- Table -->
+    <section class="card">
+      <h2>Market snapshot <span class="chart-note" id="table-note"></span></h2>
+      <div class="table-wrap">
+        <table id="coins-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Coin</th><th class="num">Price</th>
+              <th class="num">24h %</th><th class="num">7d %</th>
+              <th class="num">Market cap</th><th class="num">Volume 24h</th>
+              <th class="num">Vol/MCap</th><th>Momentum</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Observability -->
+    <section class="grid-2">
+      <article class="card">
+        <h2>Pipeline stages <span class="chart-note">last run timing</span></h2>
+        <div id="stages" class="stages"></div>
+      </article>
+      <article class="card">
+        <h2>Data quality checks <span class="chart-note" id="quality-summary"></span></h2>
+        <div id="quality-checks" class="checks"></div>
+      </article>
+    </section>
+
+    <div id="load-error" class="error-banner" hidden>
+      <strong>Could not load dashboard data.</strong>
+      <span id="load-error-detail"></span>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      Built by <a href="https://github.com/PrachyatMisra" target="_blank" rel="noopener">Prachyat Misra</a>
+      · <a href="https://github.com/PrachyatMisra/Dataflow-Mini-Etl" target="_blank" rel="noopener">Source on GitHub</a>
+      · Python · Pandas · PostgreSQL · Docker
+    </div>
+    <div class="muted">
+      Data auto-refreshes via GitHub Actions every 6&nbsp;hours ·
+      Sources: CoinGecko API, alternative.me Fear &amp; Greed Index ·
+      Educational project — not financial advice
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
