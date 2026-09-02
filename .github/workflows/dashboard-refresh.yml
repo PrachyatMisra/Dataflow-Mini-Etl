@@ -1,0 +1,64 @@
+# Keeps the GitHub Pages dashboard live.
+#
+# Runs the pipeline against the real public APIs every 6 hours and commits the
+# regenerated dashboard payload (docs/data/latest.json) back to the branch.
+# GitHub Pages picks up the change automatically, so the hosted dashboard
+# always shows fresh data without any server.
+#
+# Note: scheduled runs only trigger on the repository's default branch.
+name: Dashboard refresh
+
+on:
+  schedule:
+    - cron: "15 */6 * * *"   # a few minutes past every 6h to avoid the cron rush
+  workflow_dispatch: {}      # manual trigger from the Actions tab
+  push:
+    branches: [main]
+    paths:
+      - "etl/**"
+      - "docs/**"
+      - "requirements.txt"
+      - ".github/workflows/dashboard-refresh.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dashboard-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Run pipeline & publish fresh dashboard data
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run ETL pipeline (live APIs, artifacts only)
+        env:
+          MARKET_LIMIT: "25"
+          LOG_LEVEL: INFO
+        run: python -m etl run --source api --backend none --export-dir docs/data
+
+      - name: Commit fresh dashboard data
+        run: |
+          if git diff --quiet -- docs/data/latest.json; then
+            echo "No changes to dashboard data - nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data/latest.json
+          git commit -m "chore(dashboard): refresh data $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
