@@ -17,7 +17,7 @@ import logging
 import random
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -183,7 +183,7 @@ def extract_from_api(cfg: Settings) -> RawData:
         markets=markets,
         market_charts=charts,
         fear_greed=fear_greed,
-        fetched_at=datetime.now(timezone.utc),
+        fetched_at=datetime.now(UTC),
         source="live-api",
         calls_made=calls,
     )
@@ -218,7 +218,7 @@ def extract_from_fixtures(cfg: Settings) -> RawData:
         markets=markets,
         market_charts=charts,
         fear_greed=fear_greed,
-        fetched_at=datetime.now(timezone.utc),
+        fetched_at=datetime.now(UTC),
         source="fixture",
         calls_made=0,
     )

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pandas as pd
 
@@ -161,7 +161,7 @@ def check_freshness(df: pd.DataFrame, max_age_hours: float, strict: bool) -> Che
     latest = df["last_updated"].max()
     if pd.isna(latest):
         return Check("freshness.source", FAIL, "no parseable last_updated values", len(df), len(df))
-    age_hours = (datetime.now(timezone.utc) - latest.to_pydatetime()).total_seconds() / 3600.0
+    age_hours = (datetime.now(UTC) - latest.to_pydatetime()).total_seconds() / 3600.0
     if age_hours <= max_age_hours:
         return Check("freshness.source", PASS,
                      f"newest source timestamp {age_hours:.1f}h old", len(df))

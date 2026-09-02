@@ -34,7 +34,7 @@ jobs:
         run: ruff check etl tests
 
       - name: Test (pytest, offline fixture run)
-        run: pytest -q
+        run: python -m pytest -q
 
       - name: Smoke run (fixture -> SQLite -> artifacts)
         run: python -m etl run --source fixture --backend sqlite --log-level INFO

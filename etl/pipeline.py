@@ -15,7 +15,7 @@ import logging
 import secrets
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from . import __version__
 from .config import Settings
@@ -84,7 +84,7 @@ class PipelineResult:
 
 def run_pipeline(cfg: Settings, backend_choice: str = "auto") -> PipelineResult:
     """Execute the full ETL run and return a machine-readable result."""
-    started_at = datetime.now(timezone.utc)
+    started_at = datetime.now(UTC)
     run_id = new_run_id(started_at)
     timers = StageTimer()
     backend = None
@@ -168,7 +168,7 @@ def run_pipeline(cfg: Settings, backend_choice: str = "auto") -> PipelineResult:
         exit_code = 1
         log.exception("pipeline failed")
     finally:
-        finished_at = datetime.now(timezone.utc)
+        finished_at = datetime.now(UTC)
         report_dict = report.to_dict() if report is not None else {"summary": {}, "checks": []}
         if backend is not None:
             try:

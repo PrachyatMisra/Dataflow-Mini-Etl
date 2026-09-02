@@ -33,7 +33,7 @@ dashboard: ## Serve the GitHub Pages dashboard locally
 	$(BIN)/python -m http.server 8080 --directory docs
 
 test: ## Run the test suite
-	$(BIN)/pytest -q
+	$(BIN)/python -m pytest -q
 
 lint: ## Lint with ruff
 	$(BIN)/ruff check etl tests

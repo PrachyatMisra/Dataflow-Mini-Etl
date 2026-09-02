@@ -13,7 +13,7 @@ analytical metrics consumed by the dashboard:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pandas as pd
 
@@ -159,7 +159,7 @@ def transform_fear_greed(raw_rows: list[dict]) -> pd.DataFrame:
             continue
         records.append(
             {
-                "snapshot_date": datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat(),
+                "snapshot_date": datetime.fromtimestamp(ts, tz=UTC).date().isoformat(),
                 "value": int(row["value"]),
                 "classification": str(row.get("value_classification", "n/a")),
             }

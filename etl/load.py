@@ -16,7 +16,7 @@ import json
 import logging
 import sqlite3
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -30,14 +30,20 @@ ISO_DT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def _iso(value: Any) -> str | None:
-    """Render timestamps (pandas or datetime) as UTC ISO-8601 strings."""
+    """Render timestamps (pandas or datetime) as UTC ISO-8601 strings.
+
+    Naive timestamps are assumed to already be UTC.
+    """
     if value is None or pd.isna(value):
         return None
     if isinstance(value, pd.Timestamp):
-        return value.tz_localize("UTC").tz_localize(None).strftime(ISO_DT) if value.tzinfo is None \
-            else value.tz_convert("UTC").strftime(ISO_DT)
+        if value.tzinfo is None:
+            value = value.tz_localize("UTC")
+        return value.tz_convert("UTC").strftime(ISO_DT)
     if isinstance(value, datetime):
-        return value.astimezone().strftime(ISO_DT)
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=UTC)
+        return value.astimezone(UTC).strftime(ISO_DT)
     return str(value)
 
 
@@ -416,11 +422,17 @@ def export_artifacts(
 
     csv_path = artifact_dir / "coins_snapshot.csv"
     export_cols = [c for c in df_markets.columns if c != "image_url"]
+    ts_cols = {"ath_date", "last_updated"}
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=export_cols, extrasaction="ignore")
         writer.writeheader()
         for record in df_markets.to_dict("records"):
-            writer.writerow({k: ("" if pd.isna(v) else v) for k, v in record.items()})
+            writer.writerow(
+                {
+                    k: _iso(v) if k in ts_cols else ("" if pd.isna(v) else v)
+                    for k, v in record.items()
+                }
+            )
     written["csv"] = str(csv_path)
 
     payload_json = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
